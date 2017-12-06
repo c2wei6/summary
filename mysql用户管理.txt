@@ -1,0 +1,19 @@
+首先切换到mysql库
+
+1.修改密码
+
+mysql> UPDATE user SET Password=PASSWORD('new_password')
+           WHERE user='root';
+mysql> FLUSH PRIVILEGES;  (必须运行   否则  嘿嘿 可以试试)
+
+
+2.添加用户
+
+mysql> GRANT ALL PRIVILEGES ON *.* TO monty@localhost
+           IDENTIFIED BY 'something' WITH GRANT OPTION;
+(添加有一个全部权限的用户)
+mysql> GRANT SELECT,UPDATE,INSERT,DELETE ON db.* TO monty@localhost
+           IDENTIFIED BY 'something' WITH GRANT OPTION;
+(添加有一个正常权限的用户)
+mysql> FLUSH PRIVILEGES;  (必须运行   否则  嘿嘿 可以试试)  
+

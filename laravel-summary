@@ -1,0 +1,4 @@
+laravel坑
+一注意文件权限 777 或 757 否则 html error 500
+-记得改.env.example为.env
+-记得根目录运行 php artisan key:generate

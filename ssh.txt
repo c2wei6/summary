@@ -1,0 +1,5 @@
+生成ssh
+ssh-keygen -t rsa -C "username"
+添加ssh
+ssh-add ~/.ssh/xyz_rsa
+报错需要ssh-agent bash

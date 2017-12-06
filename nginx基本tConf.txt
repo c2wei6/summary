@@ -1,0 +1,27 @@
+server {
+
+    listen 80;
+
+    listen [::]:80;
+    server_name www.clw.dev;
+
+    root /home/clw/Desktop/www.clw.dev;
+
+    index index.html index.htm index.php;
+    location / {
+
+        try_files $uri $uri/ =404;
+
+    }
+
+    location ~ \.php$ {
+
+        include snippets/fastcgi-php.conf;
+
+        fastcgi_param  SCRIPT_FILENAME  /home/clw/Desktop/www.clw.dev/$fastcgi_script_name;
+
+        fastcgi_pass unix:/var/run/php/php7.0-fpm.sock;
+
+    }
+
+}
