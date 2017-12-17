@@ -1,0 +1,169 @@
+一、支持gbk编码
+
+安装convertToUTF8插件
+首先，按住ctrl+shift+p， 
+然后，在弹出的搜索框中输入install package 
+最后，输入ConvertToUTF8，等待安装 
+安装完成后重启subline Text3即可。
+
+二.支持中文输入法
+
+方法一、（我的电脑上没用）
+
+2.1 安装GTK库
+sudo apt-get install libgtk2.0-dev
+
+2.2 编译动态库
+新建文件sublime_imfix.c，输入如下代码：
+
+/**********************************************************
+    > File Name: sublime_imfix.c
+    > Author: GatieMe
+    > Mail: gatieme@163.com 
+    > Created Time: 2015年04月04日 星期六 20时20分12秒
+ **********************************************************/
+
+
+#include <gtk/gtkimcontext.h>
+
+void 
+gtk_im_context_set_client_window (
+                                GtkIMContext *context,
+                                GdkWindow    *window)
+{
+    GtkIMContextClass *klass;
+    g_return_if_fail (GTK_IS_IM_CONTEXT (context));
+    klass = GTK_IM_CONTEXT_GET_CLASS (context);
+
+    if (klass->set_client_window)
+    {
+        klass->set_client_window (context, window);
+    }
+    g_object_set_data(G_OBJECT(context),"window",window);
+
+    if(!GDK_IS_WINDOW (window))
+    {
+        return;
+    }
+    int width = gdk_window_get_width(window);
+    int height = gdk_window_get_height(window);
+
+    if(width != 0 && height !=0)
+    {
+
+    }
+
+    gtk_im_context_focus_in(context);
+}
+
+将代码编译成共享库
+
+gcc -shared -o libsublime-imfix.so sublime_imfix.c  `pkg-config --libs --cflags gtk+-2.0` -fPIC
+
+将生成的so共享库拷贝到/opt/sublime_text目录下
+
+sudo cp libsublime-imfix.so /opt/sublime_text/libsublime-imfix.so
+
+修改/usr/bin/subl文件
+
+sudo vim /usr/bin/subl
+//sunl文件内容
+#!/bin/sh
+export LD_PRELOAD=/opt/sublime_text/libsublime-imfix.so//第一行加入如下代码
+exec /opt/sublime_text/sublime_text "$@"
+
+
+打开sublime-text.desktop
+
+cd /usr/share/applications/
+sudo vim sublime_text.desktop
+
+
+修改sublime-text.desktop
+
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Sublime Text
+GenericName=Text Editor
+Comment=Sophisticated text editor for code, markup and prose
+Exec=/usr/bin/subl %F//此行路径修改为/usr/bin/subl
+Terminal=false
+MimeType=text/plain;
+Icon=sublime-text
+Categories=TextEditor;Development;Utility;
+StartupNotify=true
+Actions=Window;Document;
+
+X-Desktop-File-Install-Version=0.22
+
+[Desktop Action Window]
+Name=New Window
+Exec=/usr/bin/subl -n//此行路径修改为/usr/bin/subl
+OnlyShowIn=Unity;
+
+[Desktop Action Document]
+Name=New File
+Exec=/usr/bin/subl --command new_file//此行路径修改为/usr/bin/subl
+OnlyShowIn=Unity;
+
+至此，重启sublime，大功告成，中文不再乱码，输入法问题解决，愉快的享受sublime吧。
+
+
+方法二、（我用的方法）
+
+
+1.下载我们需要的文件，打开终端，输入：
+
+git clone https://github.com/lyfeyaj/sublime-text-imfix.git
+
+2.将subl移动到/usr/bin/，并且将sublime-imfix.so移动到/opt/sublime_text/（sublime的安装目录）
+终端输入：
+
+cd ~/sublime-text-imfix
+sudo cp ./lib/libsublime-imfix.so /opt/sublime_text/
+sudo cp ./src/subl /usr/bin/
+
+3.用subl命令试试能不能启动sublime，如果成功启动的话，应该就可以输入中文了。
+终端输入：
+
+LD_PRELOAD=./libsublime-imfix.so subl
+
+
+4.将上面的启动命令替换到启动器中
+
+打开sublime-text.desktop
+
+cd /usr/share/applications/
+sudo vim sublime_text.desktop
+
+
+修改sublime-text.desktop
+
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Sublime Text
+GenericName=Text Editor
+Comment=Sophisticated text editor for code, markup and prose
+Exec=/usr/bin/subl %F //此行修改为 Exec=bash -c "LD_PRELOAD=/opt/sublime_text/libsublime-imfix.so subl"
+Terminal=false
+MimeType=text/plain;
+Icon=sublime-text
+Categories=TextEditor;Development;Utility;
+StartupNotify=true
+Actions=Window;Document;
+
+X-Desktop-File-Install-Version=0.22
+
+[Desktop Action Window]
+Name=New Window
+Exec=/usr/bin/subl -n//此行修改为 Exec=bash -c "LD_PRELOAD=/opt/sublime_text/libsublime-imfix.so subl"
+OnlyShowIn=Unity;
+
+[Desktop Action Document]
+Name=New File
+Exec=/usr/bin/subl --command new_file//此行修改为 Exec=bash -c "LD_PRELOAD=/opt/sublime_text/libsublime-imfix.so subl"
+OnlyShowIn=Unity;
+
+sublime_text.desktop与你的略有不同可以忽略不同的地方，关键是修改Exec=xxxx的这种行，Exec=后跟的为启动器的执行命令
