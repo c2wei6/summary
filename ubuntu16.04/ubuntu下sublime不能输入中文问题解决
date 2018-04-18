@@ -1,4 +1,4 @@
-一、支持gbk编码
+一、让sublime支持gbk编码
 
 安装convertToUTF8插件
 首先，按住ctrl+shift+p， 
@@ -6,14 +6,14 @@
 最后，输入ConvertToUTF8，等待安装 
 安装完成后重启subline Text3即可。
 
-二.支持中文输入法
+二、让sublime支持中文输入法
 
-方法一、（我的电脑上没用）
+方法一、（在我的电脑上试了没用）
 
-2.1 安装GTK库
+1. 安装GTK库
 sudo apt-get install libgtk2.0-dev
 
-2.2 编译动态库
+2. 编译动态库
 新建文件sublime_imfix.c，输入如下代码：
 
 /**********************************************************
@@ -113,7 +113,7 @@ OnlyShowIn=Unity;
 方法二、（我用的方法）
 
 
-1.下载我们需要的文件，打开终端，输入：
+1.下载我们需要的文件(在github上有编译好的共享库)，打开终端，输入：
 
 git clone https://github.com/lyfeyaj/sublime-text-imfix.git
 
@@ -167,3 +167,38 @@ Exec=/usr/bin/subl --command new_file//此行修改为 Exec=bash -c "LD_PRELOAD=
 OnlyShowIn=Unity;
 
 sublime_text.desktop与你的略有不同可以忽略不同的地方，关键是修改Exec=xxxx的这种行，Exec=后跟的为启动器的执行命令
+
+三、没有找到启动器
+
+从Ubuntu安装sublime开始
+
+到 sublime官网下载linux可用的sublime_text_3源码
+压缩包里有一个sublime_text_3文件夹
+把文件夹解压到/opt/
+然后重命名为sublime_text （mv /opt/sublime_text_3 /opt/sublime_text 别搞错）
+在sublime_text文件夹里可以找到一个sublime.desktop复制到桌面上
+右击sublime.desktop 点击属性 改为可执行程序
+这时候双击它应该可以启动sublime
+
+然后再下载共享库
+
+下载我们需要的文件(在github上有编译好的共享库)，打开终端，输入：
+git clone https://github.com/lyfeyaj/sublime-text-imfix.git
+
+将subl移动到/usr/bin/，并且将sublime-imfix.so移动到/opt/sublime_text/（sublime的安装目录）
+终端输入：
+cd ~/sublime-text-imfix
+sudo cp ./lib/libsublime-imfix.so /opt/sublime_text/
+sudo cp ./src/subl /usr/bin/
+
+用subl命令试试能不能启动sublime，如果成功启动的话，应该就可以输入中文了。
+终端输入：
+LD_PRELOAD=./libsublime-imfix.so subl
+
+再将命令添加到sublime.desktop
+
+右击sublime.desktop 点击属性 找到命令一栏
+改成bash - c "LD_PRELOAD=./libsublime-imfix.so subl"
+这时候双击启动也能输入中文了
+
+再从桌面上把sublime.desktop拖放到启动面板里 完成
